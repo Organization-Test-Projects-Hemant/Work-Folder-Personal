@@ -1,0 +1,1142 @@
+things if they actually change because
+0:01
+if they don't change we can persist a
+0:03
+single record right
+0:05
+that was kind of the the the theory
+0:06
+behind it. So yeah so here you have this
+0:10
+type of sedd2 yep pretty much dead on
+0:13
+so this is our end of time if you will
+0:16
+you know which would always be the
+0:18
+current record has end of time and these
+0:19
+are the previous records so yeah you're
+0:21
+saying this is our transaction and this
+0:22
+is our status
+0:25
+so you're dead on and that's basically
+0:27
+what we would have for Our data is just
+0:31
+this. We are going to need one more
+0:32
+thing though.
+0:35
+And this is where it's going to get
+0:36
+interesting is we still need another
+0:41
+point, another data point in here
+0:44
+because we have a transaction and we
+0:45
+have a status.
+0:48
+A single transaction can go back and
+0:51
+forth between statuses. So we could go
+0:54
+in your in your use case here, pending
+0:55
+approval, approved, shipped. It could
+0:57
+have gone pending approval,
+1:00
+maybe declined to pending approval
+1:03
+again,
+1:05
+right?
+1:05
+And in that use case, we couldn't key
+1:07
+off transaction and pending approval.
+1:10
+So, well, shoot, we need something else.
+1:14
+Do we use effective start date? Okay. I
+1:18
+mean, that is a key. We could use that.
+1:22
+So, when when it
+1:23
+you know, it depends on how we want to
+1:24
+attack it.
+1:25
+Yes. Because when when it goes back to
+1:28
+pending approval, the effective start
+1:31
+date will change actually.
+1:33
+Exactly. Well, so should it because
+1:36
+here's the thing. This this pending
+1:38
+approval was active within this time
+1:41
+frame.
+1:42
+Correct.
+1:43
+If if we had another status that came
+1:45
+after it, then we have a new pending
+1:46
+approval that's in a new time frame.
+1:48
+Yes.
+1:48
+And it could be our current status.
+1:50
+And we can answer multiple questions
+1:51
+from that, right?
+1:52
+Yes. So if we need to if we need to
+1:54
+answer what was the duration of each
+1:57
+transaction in a pending you know for
+1:59
+pending approval like what was it
+2:01
+duration we could have multiple records
+2:03
+on it what was the first what was the
+2:04
+last these are the aggregates we can do
+2:06
+from that right so how many times did it
+2:10
+go through pending approval right we can
+2:12
+answer all those questions by organizing
+2:14
+the data this way so it is a good way to
+2:16
+organize the data
+2:17
+but do they do they need that way
+2:21
+so That is a very fair question. Do they
+2:24
+need it that way? Okay, this becomes a
+2:28
+little bit longer conversation because
+2:30
+now what we talk about is does the user
+2:33
+requesting this know exactly what they
+2:36
+need.
+2:38
+Seriously, that is a serious question
+2:40
+that we have to ask ourselves because
+2:42
+this is being asked by by an an actual
+2:45
+sophisticated user, right? Who's saying
+2:47
+we're trying to do this analysis, okay?
+2:50
+we just need to snapshot statuses so
+2:52
+that we can understand what those
+2:53
+statuses are. That's the analysis they
+2:55
+want to do right now. Okay. So
+3:00
+at some point you end up doing a job
+3:02
+long enough that you start not really
+3:04
+becoming um you can't read minds but you
+3:08
+can start looking at trends that you've
+3:10
+seen. So a trend that I have seen is
+3:14
+they're going to come ask for something
+3:16
+and they're going to ask for something
+3:17
+very specific. We want to be able to
+3:19
+snapshot statuses and show statuses
+3:22
+based on, you know, the end of the
+3:24
+period or whatever. Okay, awesome.
+3:27
+That's going to tell them something and
+3:28
+get them into a time frame of a period.
+3:30
+So everything we're doing is time frame
+3:32
+of one period. So we can answer
+3:34
+questions that are around one period.
+3:37
+How many things did we have in a pending
+3:39
+approval at the end of the period? How
+3:41
+many things did we have shipped at the
+3:42
+end of the period? How many things were
+3:44
+pending approval last period that were
+3:45
+shipped this period? Stuff like that,
+3:48
+right? We can answer those questions.
+3:49
+What we can't answer is how long did it
+3:52
+take? How long did something stay in?
+3:56
+We can't answer the timing questions
+3:59
+because we're locking everything in
+4:01
+based on a point in time and that point
+4:03
+in time is the last day of the month. So
+4:06
+we can't say what happened throughout
+4:07
+the month. We can only say what happened
+4:10
+last end of month, what happened this
+4:12
+end of month, how many things were in
+4:14
+what statuses. So knowing that the way
+4:17
+analysis tends to work, I look at it and
+4:20
+say, hey, what questions have I answered
+4:23
+around this type of data in the past and
+4:26
+some of the questions that I have
+4:28
+answered have been how much time did we
+4:30
+spend in a status? How long did it take
+4:33
+us to get something approved?
+4:35
+That is a valid question.
+4:39
+We can go if we capture it like so if we
+4:41
+capture that stuff in a log right hamont
+4:43
+if we say hey approve approval is a
+4:46
+status we want to capture and we want to
+4:47
+log that we want to say you know we
+4:50
+capture creation event and we capture an
+4:53
+approval event and I've actually had
+4:55
+systems where we did these things where
+4:57
+we captured those events uh an example
+4:59
+of this would be are you familiar with
+5:01
+the concept called booking like when you
+5:03
+book something
+5:05
+so if that makes sense like we have a
+5:08
+Here we call it send to order, but
+5:10
+that's really when a quote becomes
+5:12
+something that we're executing upon. So
+5:13
+the customer signed it. We said, "Yep,
+5:15
+we're going to go start ordering
+5:16
+things." Well, at a previous company
+5:18
+that I was with,
+5:20
+they did not log the date at which that
+5:24
+happened. They did not time stamp it
+5:26
+necessarily. They didn't put a booked
+5:28
+date on their record. However, that was
+5:31
+a concept the business needed to use. So
+5:34
+what did we do? We went to the logs and
+5:37
+we said okay we are looking for a very
+5:39
+specific event in the log and it was a
+5:41
+status change event. It was when this
+5:43
+thing this quote or this proposal
+5:46
+changes from one status to another that
+5:49
+tells us it got booked. So we go out to
+5:51
+the log and we grab this time stamp
+5:52
+there and in the data warehouse now we
+5:54
+have a book date.
+5:56
+It took us four years to finally
+5:59
+convince the business to raise an
+6:02
+enhancement request to get that put into
+6:04
+the system so that it was native and so
+6:07
+they could just look at it outside of
+6:08
+reporting. They could go look at it and
+6:10
+have it documented within the system in
+6:12
+the documentation.
+6:14
+So I look at these kind of asks and say
+6:17
+what things have I done in the past and
+6:19
+in the past I have absolutely looked at
+6:21
+these exact problems and said hey if
+6:24
+we're capturing it at the end of a month
+6:28
+that forces us and locks us to that
+6:30
+level of detail. We're always going to
+6:32
+be stuck at the end of the month.
+6:33
+However, if I capture it once a day that
+6:37
+means we have a daily analysis we can
+6:39
+do. That means we can capture more
+6:41
+trending over time. we can see how
+6:44
+things change daytoday.
+6:47
+So we can't absolutely say something was
+6:49
+in a given status for x amount of time.
+6:51
+We can't say that definitively because
+6:53
+we're not capturing the event, right?
+6:55
+We're just polling. We're polling once a
+6:58
+day. What we can say is
+7:01
+on average it takes x number of days for
+7:05
+these things to happen. Maybe it takes 4
+7:08
+days on average for it to go from
+7:10
+approved to shipped.
+7:12
+Maybe it takes a day and a half on
+7:14
+average for it to go or we can't say day
+7:16
+and a half, but we could say it's two
+7:17
+days on average for it to go pinning
+7:18
+approval to approved. Something like
+7:20
+that. It gives us a little bit more
+7:23
+analysis such that if they say, hey,
+7:26
+what statuses did these things go
+7:28
+through? We can tell them, right? We can
+7:31
+say if we're coming up to a month end,
+7:34
+and maybe that's a concept I should talk
+7:35
+about with you is month end. um our line
+7:39
+our business that we do
+7:42
+is traditionally
+7:44
+um tied to the end of a month
+7:47
+and what I mean by that is we will be
+7:49
+very slow. So if if we were to
+7:52
+um use a normal curve to represent our
+7:54
+business and how much business we do in
+7:57
+a month day overday. So think about a
+7:59
+normal curve and think about every day
+8:01
+being on that curve with day one at the
+8:04
+beginning, day 30, 31 at the end, unless
+8:07
+we're in February and then it's 28, but
+8:08
+we're not going to talk about February.
+8:10
+Um, so we'll talk 30 or 31 days, right?
+8:12
+And you're looking at the normal curve.
+8:14
+We would be skewed towards the end of
+8:17
+that month. So we would have a curve
+8:20
+that is very very low at the beginning
+8:23
+and then your bell is at the end, right?
+8:25
+Your bell curve is just at the end.
+8:28
+So
+8:29
+most of our business is skewed towards
+8:31
+booking things at the end of the month.
+8:33
+So that means we're going to have a lot
+8:34
+of activity the last week every month.
+8:38
+If we capture the status changes of
+8:41
+things because we're looking at orders
+8:43
+in this context. It's what we're going
+8:44
+to look at. Um or I'm sorry not orders,
+8:46
+we're catching this for invoices and
+8:48
+transactions. I apologize. We're we're
+8:50
+talking about the downstream componentry
+8:51
+of the orders. Um we're going to capture
+8:54
+that. If we capture that every day, we
+8:56
+can on that last week start to show the
+8:58
+trends.
+9:00
+So we can say, hey, throughout the
+9:01
+month, none of these things changed. And
+9:03
+all of a sudden, they all started to
+9:05
+change. Now we can start looking at how
+9:07
+do you get more efficient about what you
+9:09
+do as a business? What are the things
+9:11
+that we need to go retouch
+9:13
+as business processes? So if we say you
+9:16
+guys are doing most of your work the
+9:17
+last two days of a month, you could push
+9:20
+so many more things through if you would
+9:22
+start that work 2 weeks earlier. And
+9:24
+again, these are arguments that I have
+9:26
+legitimately had with business about the
+9:30
+way things are done.
+9:31
+And in that particular context with the
+9:33
+month- end stuff, it came from me being
+9:34
+month support. I was on call for month
+9:37
+for many, many years of my career.
+9:40
+And it would go on until 1 or two in the
+9:42
+morning where I would have to be doing
+9:44
+things.
+9:45
+And I finally said, "This is stupid.
+9:47
+We should be doing stuff earlier in the
+9:49
+month so that people don't have to
+9:51
+wait." And guess what? Over the next two
+9:53
+years or three years, we from not just
+9:57
+the data warehousing team, but I also
+9:59
+previously worked for application
+10:00
+support at that company. I worked with
+10:02
+that team and their leadership because I
+10:04
+knew them all and said, "Guys, we need
+10:06
+to make a shift." They stopped on call
+10:09
+for month end within two years
+10:12
+because we had so many things throwing
+10:14
+flowing through the system in a more
+10:15
+timely fashion. We weren't up pushing
+10:18
+things through until midnight and then
+10:19
+running processes afterwards. people
+10:22
+were no longer waiting till the last
+10:23
+minute.
+10:25
+So, while I don't think we're going to
+10:27
+make that change here, the point I'm
+10:28
+getting towards is if we don't start
+10:31
+thinking about those things, we don't
+10:33
+capture the history to be able to do
+10:35
+that. So, we could start today and say,
+10:38
+"Hey, we're just going to capture one
+10:39
+time a month and that's it. And we're
+10:42
+just going to lock it in. We're going to
+10:43
+store that as a snapshot every time and
+10:45
+just compare month over month." And then
+10:47
+when you come back and ask us that you
+10:48
+want to do a deeper analysis, well, we
+10:50
+have to start over. We have to go back
+10:52
+to the drawing board and say this
+10:53
+doesn't work. We need something
+10:54
+different. So our job as data engineers
+10:58
+is to be thinking about that. It is an
+11:01
+architectural thought. Yes. But every
+11:03
+single one of us as a data engineer in a
+11:06
+data warehouse space needs to have some
+11:09
+understanding of architectural
+11:12
+principles. And more so than just the
+11:15
+here's a medallion model and here's what
+11:17
+goes into layers. No, what we're talking
+11:18
+about here is data movement and data
+11:21
+analysis architecture. So, if you're not
+11:24
+familiar with data analysis and you
+11:25
+didn't come from a world where you were
+11:27
+doing business intelligence and data
+11:29
+analytics, I get it. You're you're going
+11:31
+to be bumping up against a learning
+11:33
+curve. But guess what? It's nothing to
+11:34
+be scared of. That's exciting
+11:37
+because that means now you're learning a
+11:38
+new skill you get to put on your resume.
+11:40
+Okay?
+11:42
+You're furthering yourself. So, okay, my
+11:44
+my headset's beeping at me, so let me
+11:45
+let me stop my long-winded story and
+11:47
+let's just let's just come around to
+11:48
+what you have here, because what you
+11:49
+have here is pretty much exactly what
+11:51
+we're looking for.
+11:52
+Okay,
+11:53
+so what I'll tell you is do this for a
+11:56
+starting point. Um, I want you to make
+12:00
+sure that in in context of this, we add
+12:02
+two more fields. We're going to add
+12:04
+created DT_DT and modified_dt. We want
+12:07
+those in every table we use. Then what
+12:10
+we're going to do is we're going to say
+12:12
+okay
+12:13
+we are going to use
+12:16
+logic that says here are our keys and
+12:19
+we're going to have create_dt as our
+12:22
+third key.
+12:23
+That's just to give us uniqueness. Okay.
+12:26
+So that is going to have a problem with
+12:30
+it and we're going to have to revisit
+12:32
+that because we can't rebuild data using
+12:34
+it that way. So just for today's
+12:36
+purposes we're going to talk about using
+12:38
+create a date. We're actually going to
+12:39
+come back and use something else. But I
+12:40
+just want you to have that for today.
+12:42
+And I want you to spend some time
+12:44
+thinking about how you would key the
+12:46
+data set such that you have that
+12:47
+uniqueness. Because when you're doing
+12:49
+the compare to see what you're going to
+12:51
+upsert or or I'm sorry, update or
+12:53
+insert, you're looking at the effective
+12:56
+end date, right?
+12:58
+That's your key.
+13:00
+That's the important thing. So
+13:04
+I think I've given you some information.
+13:05
+I don't know if we've coalesed it into a
+13:08
+solid idea or not. So, let me finish
+13:11
+looking through this with daily
+13:13
+snapshot. So, you're building a CTE
+13:15
+that's just giving you the test case.
+13:16
+Okay. Sure.
+13:19
+Sure. Sure. Sure. Okay. So, using a lead
+13:22
+or a lag function. That'll work. Okay.
+13:25
+Uh-oh. Did my headset die?
+13:28
+Can you hear me? A lot. Huh?
+13:30
+I can hear you. Okay. You can hear me.
+13:31
+Good. Good. Good. Good. Good. I just got
+13:33
+quiet. Okay. So, I think this is pretty
+13:34
+darn close. I think you're right in
+13:37
+there. Um, yep, yep, yep, yep.
+13:40
+Logically, that works, too. Um,
+13:44
+okay. I like that you built this with
+13:46
+some test data.
+13:48
+Source table
+13:50
+runs daily. Yep. Yep. So, what we will
+13:53
+do is we're not going to run directly
+13:54
+against Netswuite. We're going to run
+13:56
+against um we're going to use our um EDW
+13:59
+stage table to do this.
+14:01
+Mhm. So we will build the status into
+14:04
+Magneto as a table and we will just
+14:08
+populate it from our transaction object.
+14:10
+Now we can do this once a day. We can do
+14:12
+this every run. We will talk about what
+14:14
+makes the most sense.
+14:16
+Okay.
+14:17
+Yeah.
+14:17
+And if we say it makes the most sense to
+14:19
+do it every run, that's what we'll do.
+14:21
+If we say it makes sense to do this once
+14:22
+a day, that's what we'll do. I don't
+14:24
+think it matters. I think doing it every
+14:25
+run is perfectly fine.
+14:27
+Yes. Yes.
+14:28
+So why don't you do this? Um, I I want
+14:30
+to keep talking about this, but we're
+14:32
+going to we'd go for too long. It is way
+14:35
+past time for you to be done. Like an
+14:36
+hour and a half past your quitting time.
+14:39
+So, I like what I'm seeing here. I want
+14:41
+you to take this on as a project. Okay?
+14:43
+And what I want you to do is I want you
+14:45
+to work in dev and I want you to query
+14:47
+against the actual Netswuite transaction
+14:49
+in EWS stage and pick a use case in
+14:52
+there and then manipulate it.
+14:55
+You can build your own use case in there
+14:56
+because don't worry, we can rebuild that
+14:58
+data. It's not a problem. You can copy
+15:00
+it into another table if you want to and
+15:01
+copy out some use cases and manipulate
+15:03
+it. Just go play with it a little bit.
+15:05
+So, start getting more comfortable with
+15:06
+it. Um, because I've asked you guys to
+15:08
+do a lot.
+15:09
+So, you can have this on the back burner
+15:11
+and work on it a little bit tomorrow and
+15:14
+then we can reconvene Monday and really
+15:16
+chat about this and really lock some
+15:18
+things in. Um, I want to keep talking
+15:20
+about this.
+15:22
+I just don't want to keep you here for
+15:24
+another hour. Okay.
+15:25
+Right.
+15:26
+So, so let's what I'll do is I'll
+15:28
+probably skip.
+15:33
+Okay, now I can't hear you.
+16:22
+Can you hear me now?
+16:23
+I can hear you now. Yes.
+16:25
+Okay. Sorry, my headset died. So,
+16:28
+yeah,
+16:29
+there we go. Uh, what I was saying is,
+16:31
+um, I don't want to keep you any longer
+16:33
+because it is it's it's very late and
+16:36
+I'm also very hungry as well and I do
+16:38
+have a call and I do have a call coming
+16:39
+up. So, I need to get food before my
+16:41
+next call. Um, so do this or tomorrow.
+16:47
+Plan to play with this a little bit.
+16:48
+What I want to see you do is set up some
+16:50
+test use cases in dev.
+17:04
+Dang it. I'm sorry. It keeps muting me.
+17:06
+I'm sorry, Ham. Thank you. Um, it it
+17:09
+muted me because I hung up my headset
+17:11
+over there. So, all right, let me start
+17:12
+over. So, for tomorrow, what I was
+17:15
+saying, what I what I'd love to see out
+17:16
+of you is, um, come in and build your
+17:18
+Magneto table for this. So, build out
+17:21
+transaction status Netswuite. That's
+17:23
+going to be our target table. We'll do
+17:25
+that in depth.
+17:27
+And then I want you to manipulate some
+17:29
+data into it. So pick a number of
+17:32
+transactions, run them down into it,
+17:36
+go manipulate it to make it look like
+17:38
+the data has changed and run it into it,
+17:40
+right? And just do that a few times and
+17:41
+just build some example data into there
+17:43
+based on real transactions.
+17:46
+So I know our ETL is not technically
+17:48
+running in dev right now, so that's
+17:50
+going to complicate this a little bit,
+17:51
+but let's lay the groundwork and then I
+17:53
+think you and I meet Monday and we can
+17:55
+pull in Naveen and Pine if we want to as
+17:57
+well. We'll meet after the data
+17:58
+analytics call. I'll skip the leadership
+18:00
+call that's that day and we'll dive into
+18:02
+this and we'll really sit down and start
+18:04
+putting the requirement on it because
+18:05
+what you've written up I think is dead
+18:07
+on. I think it's pretty darn close to
+18:09
+what we want.
+18:10
+Perfect.
+18:11
+So good job, dude. Good job.
+18:13
+Like no joke. Like honestly for for me
+18:16
+having a discussion with you yesterday
+18:17
+and you not really knowing much about
+18:18
+type 2 SCD, you grasped it pretty quick.
+18:20
+So I think you've worked with something
+18:21
+similar before. Um you've worked with
+18:23
+the lead and lag functions. I can see
+18:25
+those are good. Those are great
+18:27
+functions, you know, and I like what
+18:29
+you're doing of the um setting it back a
+18:33
+day. That's that's a thing, right? So,
+18:36
+we'll dive into all that next uh next
+18:38
+Monday then. So, I am out tomorrow. So,
+18:41
+try to get know what you can tomorrow,
+18:43
+you know, but understand I've asked you
+18:44
+guys to do a lot of things. So, you're
+18:47
+you're going to be split focused on this
+18:49
+and some other stuff. Um I get that. So,
+18:52
+I I am asking for to step in and help
+18:54
+me. um organize things a little better
+18:57
+because
+18:59
+I'm going to be honest with you out of
+19:00
+this team I think you and he are far
+19:03
+better at organization than I am just to
+19:05
+be plain. Um I I we all have our
+19:08
+strengths, we all have our weaknesses. I
+19:11
+think my strength is teaching teaching
+19:12
+you guys the technical skill set and
+19:15
+trying to ramp you guys on some of the
+19:17
+analytical side of this as well and the
+19:18
+way I look at things and and the way we
+19:20
+build the warehouse. So really trying to
+19:22
+elevate you guys. That's what I love
+19:23
+doing. I enjoy that part of my job. Um,
+19:26
+you know, I'm just stuck with a lot of
+19:27
+other things, too. So, Pine's jumping in
+19:29
+to help a lot with this without a doubt.
+19:31
+So, things are going to get better and
+19:32
+it's going to be it's going to be less
+19:34
+chaotic in the future. That's the goal.
+19:36
+Um, always going to be the goal, though,
+19:39
+to be fair. Um, so sorry for sorry for
+19:41
+the chaos, amant. This looks good. Um,
+19:44
+if you got other tasks you're working
+19:45
+on, track this with it. Also, training.
+19:48
+Do not like I'm going to talk about this
+19:51
+with the team in the next call. We've
+19:52
+all been doing very bad job of training.
+19:55
+So there's we need to we need to do
+19:57
+better at our trainings. We need to
+19:58
+carve out time for it, which means
+20:00
+there's project work that's not getting
+20:01
+done because we're training. That is
+20:04
+planned. So we'll talk about it. It's
+20:07
+not not a huge deal. I just want you
+20:09
+guys to know that I'm going to ask you
+20:11
+guys for lots of stuff and if you push
+20:14
+back on me, you push back on me. You
+20:16
+say, "Hey, Robert, you're giving me all
+20:17
+these things. I don't have time to
+20:18
+train." I'll be like, "Okay, let's move
+20:19
+some stuff so you can train." because
+20:21
+the training is important and and the
+20:23
+training in this case is maybe just the
+20:24
+humidity classes, right? And stuff like
+20:26
+that, just the DP600, DP700 stuff
+20:29
+because I would like to see all of us,
+20:30
+including me, with the DP600 or DP700
+20:33
+before the end of the year. Um, that's
+20:35
+going to be a big ask. It's a lot of
+20:36
+work to do. So, we'll get after it.
+20:39
+Okay. No problem.
+20:41
+All righty, sir. Well, how are you
+20:42
+feeling outside of that, man? You
+20:43
+feeling pretty good?
+20:44
+Um, yeah, I'm good. I'm comfortable. No
+20:47
+problem.
+20:48
+Awesome. I like it. That's what I like
+20:50
+to hear. I think Perine's doing an
+20:51
+awesome job of stepping up his lead. So,
+20:53
+I'm super stoked. Super stoked on where
+20:55
+we're going as a team. It's uh getting
+20:58
+exciting.
+20:59
+Getting exciting.
+21:00
+Thank you.
+21:00
+But hey, sir, thank you. Get out of
+21:02
+here. Go get some rest, man. Thank you
+21:03
+for sticking around and uh feel feel
+21:05
+free to come in a bit late tomorrow,
+21:06
+man. Uh to make up for the time you
+21:08
+spent here today. Okay.
+21:10
+Okay. All right. Thank you. Have a great
+21:13
+evening. Have a great weekend, man.
+21:14
+We'll talk to you next week, sir.
+21:15
+You too. You too. Enjoy. Bye. Bye.
+21:18
+Bye.
+

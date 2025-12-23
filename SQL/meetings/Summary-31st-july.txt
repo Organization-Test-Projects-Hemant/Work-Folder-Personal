@@ -1,0 +1,52 @@
+Action Items from the Transcript:
+
+
+Manual Execution of Orchestrations:
+
+Each team member should manually execute the orchestrations (once daily, Avanti Reppel, Magneto) in their assigned environment (Dev, QA, Train).
+Ensure the blackout window is lifted after successful manual runs.
+
+Environment Assignments:
+
+Assign environments to team members:
+One person for Dev.
+One person for QA.
+One person for Train.
+Pavine will assign these roles.
+
+
+Monitor and Address Errors:
+
+Monitor emails for errors related to the environment being worked on.
+Address errors promptly and consult with teammates or escalate to Robert if needed.
+
+Blackout Window Management:
+
+Understand that the blackout window suppresses schedules but allows manual execution.
+Lift the blackout window manually after confirming all orchestrations work as expected.
+
+Testing and Observations:
+
+Test orchestrations to ensure they function correctly post-update.
+Pay attention to potential issues with Avanti connectivity due to recent upgrades.
+
+Timeline:
+
+Complete manual runs and testing by Friday's end of day.
+If not completed, plan to continue on Monday.
+
+Snapshot Write-Up:
+
+Naveen to share the prepared write-up on the snapshot of transaction status with Robert for review and discussion after the daily standup.
+
+Standup Sync:
+
+Sync up after the daily standup for data analytics to review the snapshot write-up.
+
+Future Upgrades:
+
+Be prepared for quarterly upgrades, especially for Avanti, and understand the impact on orchestrations.
+
+Coordination:
+
+Team members should communicate and coordinate the timing of manual runs to avoid concurrency issues.

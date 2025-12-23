@@ -1,0 +1,919 @@
+And the concept that I want to start
+3:48
+start us talking about very first is SQL
+3:52
+server change tracking.
+3:55
+And the thing with SQL server change
+3:57
+tracking
+3:59
+is that the way we are configured our
+4:02
+standard at C1 is we preserve change
+4:05
+tracking for 7 days.
+4:08
+That means that any record that is
+4:10
+updated,
+4:12
+we will preserve that change tracking
+4:14
+record for 7 days.
+4:17
+The net effect of this for us is from
+4:20
+the very last run of any piece of our
+4:22
+ETL. We have 7 days
+4:26
+to let things pick up and run again
+4:29
+before we start having to look at doing
+4:31
+full reloads.
+4:34
+So
+4:36
+to bring this into reality for us and
+4:38
+why this is important is with these
+4:40
+sandbox environments we're currently in
+4:42
+a blackout window for the Avanti update.
+4:46
+Okay.
+4:47
+So we know that we can be down for at
+4:50
+most probably just be safe and say 6
+4:53
+days.
+4:55
+Given that we know within six days we
+4:58
+need to have everything run through.
+5:01
+And I'm going to be real with you guys.
+5:04
+We could easily do it in six days. What
+5:05
+I'm going to say is don't give yourself
+5:07
+that time. We need to give ourselves 48
+5:09
+hours. So I normally give myself 24 to
+5:13
+36 hours to do this stuff. I'm going to
+5:15
+say for now, let's talk in 48 hours. So
+5:18
+we want to carve out a 48 hour window to
+5:21
+make sure everything runs in dev, train,
+5:24
+and QA.
+5:26
+And so when I'm doing it by myself, I
+5:29
+typically start in dev and kick off once
+5:31
+daily. I let it run for a while and then
+5:34
+I'll go kick it off and train and kick
+5:36
+it off in QA.
+5:38
+The thing that we want to be mindful of
+5:40
+with what we're about to do is the
+5:42
+impact that we put on Avanti and the
+5:45
+impact we put on Netswuite. These are
+5:48
+the things that that we really have to
+5:51
+understand is those are SAS applications
+5:54
+and they have limitations.
+5:57
+Avanti's limitation is its proxy. It
+6:00
+will only allow a certain number of
+6:01
+connections. Once we hit that cab, and
+6:05
+that goes across all sandbox
+6:07
+environments, they share the same cab.
+6:09
+It starts to fail things. It starts to
+6:12
+deny connections. We don't have a hard
+6:14
+ceiling for what that cap is, guys.
+6:17
+It's
+6:19
+been, if I'm honest, kind of random. So
+6:24
+the rule of thumb I had is, well, I
+6:26
+normally allow two environments to run
+6:29
+at the same time at most for a
+6:32
+vontreple.
+6:34
+So
+6:36
+given that, I would normally kind of run
+6:38
+those in what I call a truncated
+6:40
+schedule. I would kick it off in one
+6:41
+environment, I'd wait for it to get a
+6:43
+ways through, and then I kick off the
+6:45
+next one, you know. So I probably let it
+6:46
+run for an hour or two in dev and then I
+6:48
+go kick off QA. Let it run for an hour
+6:50
+or two go kick off train you know and
+6:53
+just follow through doing things like
+6:54
+that. And then finally Magneto once once
+6:58
+every once once daily and once ovonte
+7:01
+repple have run Magneto just let her
+7:04
+rip. Uh I'm going to say this and then
+7:07
+I'm going to say we do need to pay
+7:09
+attention to the strain we put on
+7:10
+netswuite. However,
+7:13
+with magneto ETL, when it fails, it
+7:16
+suspends. With Breffle ETL, when it
+7:20
+fails, it moves on to the next asset.
+7:24
+So, because Magneto will suspend, we can
+7:27
+let it hit that ceiling with Netswuite
+7:29
+because it will stop itself and then we
+7:31
+can come back and restart that piece.
+7:36
+So, that being said,
+7:39
+what I'd like to see today is I want to
+7:42
+see us get through once daily in each
+7:44
+environment. I had intended to start
+7:46
+them yesterday, guys, but
+7:50
+by the time I got done with the
+7:51
+deployment yesterday, I had to step away
+7:54
+and was not able to get back and do it.
+7:56
+So, let's do this. I want each one of
+7:59
+you to pick an environment. So, somebody
+8:00
+take dev, somebody take QA, and somebody
+8:03
+take train.
+8:05
+What I would and I would like each one
+8:07
+of you to go just talk to each other and
+8:10
+say, "Hey, we're going to start in dev."
+8:12
+And then maybe in 30 minutes, an hour,
+8:15
+somebody's going to kick off QA
+8:18
+and then 30 minutes to an hour after
+8:20
+that, somebody's going to kick off
+8:22
+train,
+8:24
+right? And so the goal that I want you
+8:26
+guys to to focus on is
+8:29
+between now and when you leave Friday,
+8:32
+when you finish your day Friday, so your
+8:34
+normal finishing time, please, not not
+8:35
+beyond it. Um, try to have everything
+8:39
+run through in each environment.
+8:41
+If that doesn't happen, don't worry
+8:43
+about staying late and finishing it. We
+8:45
+still have time. Plan to come in Monday
+8:49
+and execute some of that. So you don't
+8:52
+have to sit here and watch it, guys. You
+8:54
+don't have to, you know, click on TF
+8:56
+Magneto prod. So, like what we would do
+8:59
+here. Um, you don't have to, you know,
+9:03
+click run on it and then go to monitor
+9:06
+and just stare at it and watch it. No,
+9:07
+just watch your emails, you know, just
+9:09
+pay attention to what's coming in in
+9:11
+your emails
+9:12
+and when you see an email related to the
+9:14
+environment you're working in, go
+9:17
+address it. Just go look at the
+9:18
+monitors, see what the error is. If
+9:20
+you've got questions, talk amongst
+9:22
+yourselves about it. If you're
+9:24
+uncertain, you can wait on me to get
+9:26
+back. You can you can send me an email.
+9:27
+You can send me an IM, you know,
+9:29
+whatever whatever would help you guys.
+9:31
+Um, I'd like us to try it this time
+9:34
+doing it this way. I know we're probably
+9:36
+going to run into some issues and I
+9:38
+think that's a good thing. I'm going to
+9:40
+start asking you guys to to look at some
+9:42
+issues and start troubleshooting. All
+9:44
+right. You got a question for what's up?
+9:45
+Yeah. So that means uh once we uh start
+9:48
+running these things the blackout will
+9:50
+be removed or uh just
+9:53
+the blackout's still there. So okay so
+9:55
+that's a good question. That's actually
+9:56
+a great question. Let's real real
+9:58
+quickly talk about how blackout windows
+10:01
+work in Informatica because I think
+10:02
+that's important to understand. Um
+10:07
+damn that's a good question for good
+10:08
+question. I'm glad you asked that. the
+10:11
+setup uh the set already set up
+10:14
+schedules will be paused only if you are
+10:17
+running manually it will right uh
+10:20
+you're dead on deine listen to this man
+10:22
+he knows his business so yeah that
+10:24
+that's exactly right the the way it
+10:26
+works is the blackout just keeps
+10:28
+schedules from executing that's it we
+10:30
+can still manually execute anything we
+10:32
+want
+10:34
+so in that regard blackout window is
+10:37
+very very useful for keeping things
+10:39
+quiet
+10:41
+and not letting the automations kick off
+10:43
+because that's really all it does is it
+10:45
+just suppresses schedules.
+10:48
+So
+10:50
+yeah,
+10:52
+so that means like uh each day we need
+10:54
+to go and keep running like the same way
+10:58
+what we doing planned today.
+10:59
+Okay. Okay. So another another fair
+11:02
+question. So what I will say is this.
+11:05
+We're not going to do it every day like
+11:06
+that. What we're going to do is you're
+11:08
+going to run each one independently,
+11:11
+right? So, we're going to run like I put
+11:13
+in the the body of this um of this
+11:16
+meeting invite. We're going to run
+11:18
+Yes.
+11:18
+once daily first, then avant reppel and
+11:21
+then magneto. Once we have all those
+11:23
+through one time, we just remove the
+11:26
+blackout period. What we do is we come
+11:28
+up here to blackout and we just uncheck
+11:29
+it
+11:31
+and click okay. and that lifts the
+11:34
+blackout window or we naturally let it
+11:36
+lift on August 5th. We'd probably prefer
+11:38
+not to do that. We'd probably prefer to
+11:40
+lift it beforehand. But with each
+11:42
+environment, once we run through the
+11:44
+first time the the orchestrations, we
+11:47
+can lift the blackout window. All we're
+11:49
+doing with this manual run of the
+11:50
+orchestrations is just ensuring that
+11:53
+we're paying attention, right? Because
+11:55
+what we don't want to do is we don't
+11:56
+want to let it naturally kick off and
+11:58
+have all three orchestrations running at
+12:00
+the same time and just errors are slowly
+12:02
+starting to trickle in, right? Because
+12:05
+here's the thing,
+12:07
+we're going to run once daily. Once
+12:08
+daily is going to hit every source
+12:10
+system we have. So if we have an Avanti
+12:13
+connectivity issue, because here's the
+12:15
+thing, Avanti just did an upgrade. There
+12:19
+is a good chance that they screwed
+12:22
+something up on their side. namely they
+12:24
+might not have remapped SIDS at the
+12:26
+database
+12:27
+and if they didn't do that it's going to
+12:29
+fail and we're going to have to open a
+12:31
+ticket and we need to know about that
+12:33
+sooner rather than later. We can run
+12:35
+everything that's not avant still but
+12:38
+Avanti is just going to be paused. That
+12:40
+in itself not a huge problem that we can
+12:44
+work around.
+12:46
+So we just want to test these things but
+12:48
+we don't want to
+12:51
+have a bad test. A bad test would be
+12:53
+just letting everything kind of run
+12:54
+naturally where there's a lot of
+12:56
+collision and a lot of resource
+12:57
+contention because then we're not
+12:58
+certain the failures are for the reason
+13:01
+you know that.
+13:02
+Let me rephrase that. We can't be
+13:05
+certain
+13:07
+that the failures were associated to the
+13:09
+upgrade in that case
+13:11
+because it could be resource contention.
+13:13
+It could be any number of things. Does
+13:14
+that make sense?
+13:17
+Yeah. And I have one uh
+13:20
+Yeah. Go ahead.
+13:22
+assumptions need to clear. So right now
+13:25
+this blackout we made because of uh
+13:27
+there is some updates happening in
+13:29
+theanti and uh so instead of uh
+13:33
+particularly for ivante objects. So
+13:35
+right now yanti objects are um
+13:38
+everywhere in all the schedules means uh
+13:40
+production once daily and all. So we are
+13:42
+blacking out for all the schedules and
+13:45
+then uh once after uh the update uh
+13:51
+completes and then we are just testing
+13:54
+it manually. Uh so is all the uh four
+13:58
+schedules are working properly or not
+14:00
+and then we are removing the blackout
+14:02
+period. Uh right Robert so
+14:05
+yep we just want to make sure do the
+14:06
+orchestrations work? Does everything
+14:08
+function as we expect it to? Uh and you
+14:11
+said that uh ripple components uh so
+14:15
+there is uh means uh if something is
+14:17
+failing uh some jobs are failing uh the
+14:20
+next uh job will trigger automatically
+14:23
+means uh like
+14:26
+so uh we made uh this one uh in purpose
+14:31
+for
+14:32
+correct very purposefully done this way.
+14:35
+Um and I will explain to you the reason
+14:37
+why very quickly. Um, so this this is
+14:40
+really should be pretty um let's see is
+14:43
+it B4 B3? I think it's B3. This one
+14:47
+should be pretty um pretty easy to
+14:50
+understand once I explain it is
+14:53
+if you think about these
+14:56
+objects in here. So each one of these
+14:58
+objects are truly independent of one
+15:00
+another.
+15:01
+What we're doing is we're saying, "Hey,
+15:03
+if incident fails, we don't want you to
+15:06
+not load item master. We just want to
+15:07
+skip incident and go to item master
+15:09
+because this is replication,
+15:12
+right? It's just replicating the data
+15:14
+from place to place." So, if we miss one
+15:16
+round of replication, whatever, we'll
+15:19
+pick it up on the next round. And we
+15:21
+have to be very thoughtful about that.
+15:22
+And that's why from here forward it uses
+15:25
+change tracking so that if something
+15:27
+like that does happen it doesn't disrupt
+15:30
+us downstream will catch up the next
+15:32
+run. So that was always the intention.
+15:34
+It was the we need to get what data we
+15:36
+can every run and we want it to not just
+15:41
+stop itself.
+15:43
+We want it to keep running. This is
+15:45
+where I'm lying to you is because this
+15:47
+guy will suspend. This subwork will
+15:49
+suspend guys with internally. That is by
+15:52
+design. Um, it doesn't happen very
+15:55
+often. When it does, it's not a big
+15:58
+deal. Ignore it. Honestly, you just go
+16:00
+stop things and the next time it runs,
+16:01
+everything will be okay. Um, this this
+16:04
+piece is becoming less important and
+16:05
+it's probably going to go away. But you
+16:07
+can see the way we're set up. If you
+16:09
+just look at the um at this piece right
+16:12
+here, this is where we're piping out and
+16:14
+we're just saying, "Hey, if you fail,
+16:15
+pipe this way and just keep running."
+16:18
+Yeah.
+16:18
+So, yep. It's very unique in this case
+16:21
+and it was built expressly for the
+16:22
+apology replication.
+16:24
+Okay. And uh we have to run uh once uh
+16:29
+once in a one because uh
+16:32
+correct
+16:33
+it will parallely process and it will
+16:35
+down the uh the timings mean
+16:39
+right we just don't we don't we can't
+16:40
+support the concurrency.
+16:42
+Ah
+16:43
+um so it's we just don't want things
+16:45
+stepping on one another. We want to have
+16:47
+it good and clean and bring things back
+16:49
+up nicely. That's all there is to it.
+16:51
+Uhu.
+16:52
+So, all right. Any more questions?
+16:57
+And
+17:00
+uh so after uh means one if we do uh so
+17:03
+sorry once again I am asking if we do
+17:05
+only one time means manually and then if
+17:07
+we remove the blackout it is fine means
+17:10
+after observing if everything is going
+17:12
+well. Yeah.
+17:14
+Yeah. And so, so once once we
+17:16
+successfully run everything, we remove
+17:18
+that blackout window, it's back to
+17:20
+normal operating, right? It's back to
+17:22
+the way things operate as usual. Um, and
+17:25
+that's the goal, right? Is to get there
+17:26
+as quickly as we can. Um, with as few
+17:30
+errors as possible, but we don't have a
+17:32
+lot of control over those errors, right?
+17:35
+So, that's where we are. Um,
+17:38
+yeah. Okay. Any any everybody
+17:41
+comfortable with what they need to go
+17:42
+do? Um, it I say Pine, why don't you
+17:46
+pick an environment and pick an
+17:48
+environment for the other two guys?
+17:49
+Somebody pick dev, somebody pick train,
+17:51
+somebody pick QA. And I'll make Pavine
+17:53
+be the bad guy so I don't have to be
+17:55
+this time. No, I got kids.
+17:57
+What I will say, guys, is train is
+17:59
+really easy. Okay.
+18:01
+Um,
+18:01
+the train environment doesn't have as
+18:03
+much stuff in it.
+18:05
+It doesn't have Netswuite, so it's a lot
+18:07
+faster run through. Um,
+18:10
+don't stress too much about train. Um,
+18:13
+you know, I I'd say
+18:16
+give it to whomever and, you know, next
+18:18
+time we do this, we'll switch it up and
+18:20
+somebody will we'll trade around who
+18:21
+gets to do what what environments so
+18:23
+everybody gets a chance to do uh the
+18:25
+ones that suck.
+18:29
+Now the how often these upgrades will be
+18:31
+happening uh like now it's only one uh
+18:35
+for other things like
+18:37
+probably be about once a quarter I would
+18:39
+say.
+18:39
+Oh, okay. Um it it we may have more
+18:42
+frequency on certain things but Avanti
+18:44
+is really the one that causes this. Um
+18:47
+none of the other applications
+18:50
+uh we don't do this for. Now Netswuite
+18:52
+we may but it depends. Um it's really
+18:55
+case by case guys and I'll walk you
+18:56
+through each one of those times uh when
+18:58
+we're getting to it to help you guys
+18:59
+understand how the decisions are being
+19:00
+made.
+19:01
+Okay.
+19:02
+And this SAS application means the
+19:04
+database we are managing the C1 is
+19:06
+managing or themsel they are managing
+19:08
+they they manage it. So, it's it is
+19:10
+owned by wholly owned by Avanti. We just
+19:12
+connect to it. Um, and in fact, that's
+19:15
+going to get really interesting in one
+19:16
+of the changes that are coming. I got an
+19:18
+email on it yesterday. Uh, I'm not going
+19:19
+to talk about it till I know more.
+19:21
+But, um, yeah, we're going to have we're
+19:24
+going to have a lot of not fun days
+19:25
+dealing with it. Um, to get things in
+19:27
+order. It it'll be it's going to be it's
+19:29
+going to be a thing. So, we'll cover
+19:31
+that another day because I don't want to
+19:33
+talk about it right now. I don't want to
+19:34
+think about it right now.
+19:36
+Okay.
+19:37
+It's going to be annoying. So,
+19:39
+regardless, we're going to we're going
+19:41
+to have a fun time. I'm just hopeful
+19:43
+that we can get into Fabric and get
+19:44
+going there so we don't have to worry
+19:46
+about it as much. We'll see. But all
+19:48
+right, guys. I need to go sync up with
+19:49
+Hamachi real quick before my next call.
+19:51
+If you guys need anything from me, reach
+19:53
+out. Um Naveen, I think you and I meet
+19:57
+in about 20 minutes, so we'll get we'll
+19:59
+get trucking then. Um outside of that,
+20:01
+guys, you need me, give me a shout.
+20:04
+Thanks. Thanks.
+20:05
+Thanks everybody. Hope you all are
+20:06
+having a good morning so far or a good
+20:08
+afternoon as it may be and we'll talk to
+20:09
+you guys in a little bit. Okay.
+20:10
+Yes sir. Hand
+20:12
+sorry. Sorry. Um so
+20:14
+no not at all.
+20:15
+We discussed yesterday about that
+20:18
+snapshot of transaction status.
+20:21
+Yes sir.
+20:22
+Uh
+20:22
+I owe you a write up on that.
+20:24
+Yes. So no you so I I prepared a what I
+20:30
+I prepared what I understood yesterday.
+20:34
+So need your five minutes or 10 minutes
+20:36
+to show it to you. I'm anyway sending
+20:39
+the email but want to show you show it
+20:42
+to you and if you want to discuss we can
+20:44
+discuss it.
+20:45
+So
+20:46
+okay let's uh let's try to sync up after
+20:48
+the daily standup for for data
+20:50
+analytics. Let me move the call that I
+20:53
+have at that time to next week.
+20:56
+Perfect.
+20:57
+So okay. Yep. So I'm going to move that
+20:59
+one to move this guys to next week and
+21:02
+we'll do that. Okay, that works for me.
+21:04
+All right, thank you.
+21:05
+All right, so we'll see you after stand
+21:06
+up. Yep. Thank you, gentlemen. Now, I do
+21:08
+need to go meet Hamachu. So, we'll talk
+21:09
+to you guys in a little bit and I um
+21:12
+yeah, we'll go from there. Thanks, guys.
+21:14
+Byebye.
