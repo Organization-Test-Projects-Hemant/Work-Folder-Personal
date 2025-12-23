@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game - Final</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #333;
+            font-family: 'Courier New', Courier, monospace;
+            color: #eee;
+        }
+        h1 {
+            font-size: 2.5em;
+            text-shadow: 2px 2px #000;
+        }
+
+        /* --- THE FIX IS HERE (Part 1) --- */
+        /* This new wrapper will contain both the board and the overlay */
+        #game-wrapper {
+            position: relative; /* This is crucial for positioning the overlay */
+            width: 510px; /* 500px for board + 10px for border */
+            height: 510px;/* 500px for board + 10px for border */
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-rows: repeat(20, 1fr);
+            grid-template-columns: repeat(20, 1fr);
+            width: 500px;
+            height: 500px;
+            background-color: #555;
+            border: 5px solid #222;
+        }
+
+        .snake {
+            background-color: #0f0;
+            border: 1px solid #333;
+            border-radius: 2px;
+            z-index: 1;
+        }
+        .food {
+            background-color: #f00;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        #game-over-screen {
+            position: absolute; /* Positioned relative to #game-wrapper */
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10; /* Make sure it's on top */
+        }
+        #game-over-screen h2 {
+            font-size: 3em; color: #f00; margin: 0;
+        }
+        #game-over-screen button {
+            margin-top: 20px; padding: 15px 30px; font-size: 1.5em;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #eee; border: 2px solid #000; cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Score: <span id="score">0</span></h1>
+
+    <!-- --- THE FIX IS HERE (Part 2) --- -->
+    <!-- The game board and the overlay are now siblings inside the wrapper -->
+    <div id="game-wrapper">
+        <div id="game-board"></div>
+        <div id="game-over-screen" class="hidden">
+            <h2>GAME OVER</h2>
+            <button id="play-again-button">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const BOARD_SIZE = 20;
+        const gameBoard = document.getElementById('game-board');
+        const scoreDisplay = document.getElementById('score');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const playAgainButton = document.getElementById('play-again-button');
+
+        let snake, food, direction, score, speed, gameInterval, isGameOver;
+
+        function startGame() {
+            snake = [{ x: 10, y: 10 }];
+            food = getRandomFoodPosition();
+            direction = { x: 0, y: 0 };
+            score = 0;
+            speed = 200;
+            isGameOver = false;
+
+            scoreDisplay.textContent = score;
+            gameOverScreen.classList.add('hidden');
+            
+            clearInterval(gameInterval);
+            gameInterval = setInterval(gameLoop, speed);
+        }
+
+        function gameLoop() {
+            if (isGameOver) return;
+            moveSnake();
+            // --- THE FIX IS HERE (Part 3) ---
+            // We now check for collision *before* drawing.
+            if (checkCollision()) {
+                endGame();
+                return; // Stop the loop immediately
+            }
+            draw();
+        }
+
+        document.addEventListener('keydown', event => {
+            if (isGameOver) return;
+            switch (event.key) {
+                case 'ArrowUp':
+                    if (direction.y === 0) direction = { x: 0, y: -1 };
+                    break;
+                case 'ArrowDown':
+                    if (direction.y === 0) direction = { x: 0, y: 1 };
+                    break;
+                case 'ArrowLeft':
+                    if (direction.x === 0) direction = { x: -1, y: 0 };
+                    break;
+                case 'ArrowRight':
+                    if (direction.x === 0) direction = { x: 1, y: 0 };
+                    break;
+            }
+        });
+        
+        function moveSnake() {
+            if (direction.x === 0 && direction.y === 0) return;
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                scoreDisplay.textContent = score;
+                food = getRandomFoodPosition();
+            } else {
+                snake.pop();
+            }
+        }
+
+        function draw() {
+            gameBoard.innerHTML = '';
+            drawSnake();
+            drawFood();
+        }
+
+        function checkCollision() {
+            const head = snake[0];
+            if (direction.x === 0 && direction.y === 0) return false;
+            if (head.x < 1 || head.x > BOARD_SIZE || head.y < 1 || head.y > BOARD_SIZE) {
+                return true;
+            }
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function drawSnake() {
+            snake.forEach(segment => {
+                const element = document.createElement('div');
+                element.style.gridRowStart = segment.y;
+                element.style.gridColumnStart = segment.x;
+                element.classList.add('snake');
+                gameBoard.appendChild(element);
+            });
+        }
+
+        function drawFood() {
+            const element = document.createElement('div');
+            element.style.gridRowStart = food.y;
+            element.style.gridColumnStart = food.x;
+            element.classList.add('food');
+            gameBoard.appendChild(element);
+        }
+
+        function getRandomFoodPosition() {
+            let newPos;
+            while (newPos == null || onSnake(newPos)) {
+                newPos = {
+                    x: Math.floor(Math.random() * BOARD_SIZE) + 1,
+                    y: Math.floor(Math.random() * BOARD_SIZE) + 1
+                };
+            }
+            return newPos;
+        }
+
+        function onSnake(position) {
+            return snake.some(seg => seg.x === position.x && seg.y === position.y);
+        }
+
+        function endGame() {
+            isGameOver = true;
+            clearInterval(gameInterval);
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        playAgainButton.addEventListener('click', startGame);
+        startGame();
+    </script>
+</body>
+</html>

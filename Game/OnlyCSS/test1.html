@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celestial Atom (CSS Only)</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            perspective: 24em;
+        }
+
+        /* All child elements of the body will respect the 3D space */
+        body * {
+            transform-style: preserve-3d;
+        }
+
+        .scene {
+            position: relative;
+        }
+
+        /* All direct children of the scene will be stacked */
+        .scene * {
+            position: absolute;
+        }
+
+        .bigDots {
+            /* Slow global rotation */
+            animation: rotate 32s infinite linear reverse;
+        }
+
+        .bigDots i {
+            /* Makes the dot elements large circles */
+            inset: -2.5em; 
+            background-image: radial-gradient(
+                circle at top,
+                /* Color is calculated based on the --i variable (-1 or 1) */
+                hsl(calc(var(--i) * 120) 100% 75%),
+                #000
+            );
+            border-radius: 50%;
+            /* Pushes the two big dots apart */
+            translate: calc(var(--i) * 6em);
+            box-shadow: 0 0 1em #000;
+            /* A faster local rotation to contrast the global one */
+            animation: rotate 32s infinite linear;
+        }
+
+        .dots {
+            /* Create a non-linear animation delay for each ring of dots */
+            --delay: calc(pow(var(--d), 2.5) * -0.005s - var(--d) * 0.05s);
+
+            /* This combines the two rotate animations instead of overriding */
+            animation-composition: add; 
+            /* Each ring has a fast rotation AND the slow global rotation */
+            animation: rotate 6s var(--delay) infinite linear,
+                       rotate 32s infinite linear reverse;
+        }
+
+        .dots i {
+            /* --n is a normalized value (-1 to 1) based on the dot's index */
+            --n: calc(var(--i) / 7.5 - 1);
+            /* Position the dot horizontally based on its normalized index */
+            --translateX: calc(var(--n) * 12em);
+            /* Position the dot vertically using a sine wave for smooth oscillation */
+            --translateY: calc(sin((var(--i) + 1) / 17 * 360deg) * 12em);
+
+            inset: calc(var(--d) * -0.05em - 0.2em);
+            background-image: radial-gradient(
+                circle at top,
+                hsl(calc(var(--n) * 120) 100% 75%),
+                #000
+            );
+            border-radius: 50%;
+            box-shadow: 0 0 1em #000;
+            animation-composition: add;
+            /* Combines three animations: oscillation, fast reverse rotation, and slow global rotation */
+            animation: translate 3s var(--delay) infinite ease-in-out alternate,
+                       rotate 6s var(--delay) infinite linear reverse,
+                       rotate 32s infinite linear;
+        }
+
+        /* Rotates elements around the Y axis */
+        @keyframes rotate {
+            to {
+                rotate: y 360deg;
+            }
+        }
+
+        /* Moves dots between their positive and negative vertical positions */
+        @keyframes translate {
+            from {
+                translate: var(--translateX) var(--translateY);
+            }
+            to {
+                translate: var(--translateX) calc(var(--translateY) * -1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scene">
+        <div class="bigDots">
+            <i style="--i: -1;"></i>
+            <i style="--i: 1;"></i>
+        </div>
+        <!-- Each .dots div is a ring of particles -->
+        <div class="dots" style="--d: 0;"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i><i style="--i: 5;"></i><i style="--i: 6;"></i><i style="--i: 9;"></i><i style="--i: 10;"></i><i style="--i: 11;"></i><i style="--i: 12;"></i><i style="--i: 13;"></i><i style="--i: 14;"></i><i style="--i: 15;"></i></div>
+        <div class="dots" style="--d: 1;"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i><i style="--i: 5;"></i><i style="--i: 6;"></i><i style="--i: 9;"></i><i style="--i: 10;"></i><i style="--i: 11;"></i><i style="--i: 12;"></i><i style="--i: 13;"></i><i style="--i: 14;"></i><i style="--i: 15;"></i></div>
+        <div class="dots" style="--d: 2;"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i><i style="--i: 5;"></i><i style="--i: 6;"></i><i style="--i: 9;"></i><i style="--i: 10;"></i><i style="--i: 11;"></i><i style="--i: 12;"></i><i style="--i: 13;"></i><i style="--i: 14;"></i><i style="--i: 15;"></i></div>
+        <div class="dots" style="--d: 3;"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i><i style="--i: 5;"></i><i style="--i: 6;"></i><i style="--i: 9;"></i><i style="--i: 10;"></i><i style="--i: 11;"></i><i style="--i: 12;"></i><i style="--i: 13;"></i><i style="--i: 14;"></i><i style="--i: 15;"></i></div>
+        <div class="dots" style="--d: 4;"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i><i style="--i: 5;"></i><i style="--i: 6;"></i><i style="--i: 9;"></i><i style="--i: 10;"></i><i style="--i: 11;"></i><i style="--i: 12;"></i><i style="--i: 13;"></i><i style="--i: 14;"></i><i style="--i: 15;"></i></div>
+        <div class="dots" style="--d: 5;"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i><i style="--i: 5;"></i><i style="--i: 6;"></i><i style="--i: 9;"></i><i style="--i: 10;"></i><i style="--i: 11;"></i><i style="--i: 12;"></i><i style="--i: 13;"></i><i style="--i: 14;"></i><i style="--i: 15;"></i></div>
+        <div class="dots" style="--d: 6;"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i><i style="--i: 5;"></i><i style="--i: 6;"></i><i style="--i: 9;"></i><i style="--i: 10;"></i><i style="--i: 11;"></i><i style="--i: 12;"></i><i style="--i: 13;"></i><i style="--i: 14;"></i><i style="--i: 15;"></i></div>
+        <div class="dots" style="--d: 7;"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i><i style="--i: 5;"></i><i style="--i: 6;"></i><i style="--i: 9;"></i><i style="--i: 10;"></i><i style="--i: 11;"></i><i style="--i: 12;"></i><i style="--i: 13;"></i><i style="--i: 14;"></i><i style="--i: 15;"></i></div>
+    </div>
+
+</body>
+</html>

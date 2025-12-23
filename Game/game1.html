@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Falling Star</title>
+    <style>
+        /* --- Basic Page Setup --- */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #282c34;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+
+        /* --- Main 3-Column Layout --- */
+        #main-wrapper {
+            display: flex;
+            align-items: flex-start; /* Aligns items to the top */
+            gap: 30px; /* Space between columns */
+        }
+
+        /* --- Left & Right Panels --- */
+        .panel {
+            width: 200px;
+            background-color: #3c4048;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #61dafb;
+        }
+        
+        .panel h2 {
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 1px solid white;
+            padding-bottom: 10px;
+        }
+
+        /* --- Controls on the Left Panel --- */
+        #controls-container label {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        #controls-container input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box; /* Makes padding not affect width */
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+        }
+
+        #controls-container button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border: none;
+            background-color: #61dafb;
+            color: #282c34;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        /* Stats Display */
+        #stats-container {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        #stats-container p {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* --- Game Area (Center) --- */
+        #game-container {
+            width: 600px;
+            height: 400px;
+            background-color: #444951;
+            border: 2px solid white;
+            position: relative;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        #player {
+            width: 100px;
+            height: 20px;
+            background-color: #61dafb;
+            position: absolute;
+            bottom: 10px;
+            border-radius: 5px;
+        }
+
+        #star {
+            width: 30px;
+            height: 30px;
+            background-color: #f1c40f;
+            position: absolute;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        }
+
+        /* --- High Score List (Right Panel) --- */
+        #high-scores-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+        #high-scores-list li {
+            font-size: 1.4em;
+            padding: 8px;
+            background-color: #282c34;
+            margin-bottom: 8px;
+            border-radius: 3px;
+        }
+
+        /* Helper class to hide elements */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="main-wrapper">
+
+        <!-- LEFT PANEL: CONTROLS & INFO -->
+        <div id="left-panel" class="panel">
+            <h2>Controls</h2>
+            <div id="controls-container">
+                <label for="player-name-input">Player Name:</label>
+                <input type="text" id="player-name-input" placeholder="Enter Name" maxlength="15">
+                
+                <button id="start-button">Start Game</button>
+                <button id="play-again-button" class="hidden">Play Again</button>
+                <button id="change-player-button" class="hidden">Change Player</button>
+
+                <div id="stats-container" class="hidden">
+                    <p>Score: <span id="score">0</span></p>
+                    <p>Time: <span id="timer">5:00</span></p>
+                </div>
+                <div id="game-over-message" class="hidden">
+                    <h3>Game Over!</h3>
+                    <p>Final Score: <span id="final-score">0</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER: GAME AREA -->
+        <div id="game-container">
+            <div id="player"></div>
+            <div id="star"></div>
+        </div>
+
+        <!-- RIGHT PANEL: HIGH SCORES -->
+        <div id="right-panel" class="panel">
+            <h2>High Scores</h2>
+            <ul id="high-scores-list">
+                <li>Enter a name to see scores!</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // --- HTML Element References ---
+        const gameContainer = document.getElementById('game-container');
+        const player = document.getElementById('player');
+        const star = document.getElementById('star');
+        
+        // Left Panel Elements
+        const statsContainer = document.getElementById('stats-container');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const playerNameInput = document.getElementById('player-name-input');
+        const startButton = document.getElementById('start-button');
+        const playAgainButton = document.getElementById('play-again-button');
+        const changePlayerButton = document.getElementById('change-player-button');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const finalScoreDisplay = document.getElementById('final-score');
+        
+        // Right Panel Elements
+        const highScoreList = document.getElementById('high-scores-list');
+
+        // --- Game State and Configuration ---
+        const GAME_DURATION_SECONDS = 300; // 5 minutes
+        const SCORES_STORAGE_KEY = 'catchTheStarHighScores';
+        let score = 0, starSpeed = 2, gameTimeLeft = GAME_DURATION_SECONDS;
+        let currentPlayerName = '';
+        let gameInterval = null, timerInterval = null, speedIncreaseInterval = null;
+
+        // --- UI View Management ---
+        function showStartView() {
+            playerNameInput.disabled = false;
+            playerNameInput.value = '';
+            startButton.classList.remove('hidden');
+            playAgainButton.classList.add('hidden');
+            changePlayerButton.classList.add('hidden');
+            statsContainer.classList.add('hidden');
+            gameOverMessage.classList.add('hidden');
+            highScoreList.innerHTML = `<li>Enter a name to see scores!</li>`;
+        }
+
+        function showGameView() {
+            playerNameInput.disabled = true;
+            startButton.classList.add('hidden');
+            playAgainButton.classList.add('hidden');
+            changePlayerButton.classList.add('hidden');
+            gameOverMessage.classList.add('hidden');
+            statsContainer.classList.remove('hidden');
+        }
+
+        function showGameOverView() {
+            statsContainer.classList.add('hidden');
+            playAgainButton.classList.remove('hidden');
+            changePlayerButton.classList.remove('hidden');
+            finalScoreDisplay.textContent = score;
+            gameOverMessage.classList.remove('hidden');
+        }
+
+        // --- Score Management ---
+        function getHighScores() {
+            const scoresJSON = localStorage.getItem(SCORES_STORAGE_KEY);
+            return scoresJSON ? JSON.parse(scoresJSON) : {};
+        }
+        
+        function saveHighScore(playerName, newScore) {
+            const scores = getHighScores();
+            if (!scores[playerName]) scores[playerName] = [];
+            scores[playerName].push(newScore);
+            scores[playerName].sort((a, b) => b - a);
+            scores[playerName] = scores[playerName].slice(0, 5);
+            localStorage.setItem(SCORES_STORAGE_KEY, JSON.stringify(scores));
+        }
+
+        function displayHighScores() {
+            const scores = getHighScores();
+            const playerScores = scores[currentPlayerName] || [];
+            highScoreList.innerHTML = '';
+            if (playerScores.length === 0) {
+                highScoreList.innerHTML = `<li>No scores yet!</li>`;
+            } else {
+                playerScores.forEach(score => {
+                    const li = document.createElement('li');
+                    li.textContent = score;
+                    highScoreList.appendChild(li);
+                });
+            }
+        }
+
+        // --- Player Movement ---
+        gameContainer.addEventListener('mousemove', (e) => {
+            const containerRect = gameContainer.getBoundingClientRect();
+            let newPlayerX = e.clientX - containerRect.left - (player.offsetWidth / 2);
+            if (newPlayerX < 0) newPlayerX = 0;
+            if (newPlayerX > gameContainer.offsetWidth - player.offsetWidth) {
+                newPlayerX = gameContainer.offsetWidth - player.offsetWidth;
+            }
+            player.style.left = newPlayerX + 'px';
+        });
+
+        // --- Game Core Functions ---
+        function resetStar() {
+            star.style.top = '0px';
+            const randomX = Math.random() * (gameContainer.offsetWidth - star.offsetWidth);
+            star.style.left = randomX + 'px';
+        }
+
+        function gameLoop() {
+            let currentTop = star.offsetTop;
+            star.style.top = (currentTop + starSpeed) + 'px';
+            const starRect = star.getBoundingClientRect();
+            const playerRect = player.getBoundingClientRect();
+            if (starRect.bottom >= playerRect.top && starRect.right >= playerRect.left && starRect.left <= playerRect.right && starRect.top < playerRect.bottom) {
+                score++;
+                scoreDisplay.textContent = score;
+                resetStar();
+            }
+            if (currentTop > gameContainer.offsetHeight) {
+                resetStar();
+            }
+        }
+        
+        function updateTimer() {
+            gameTimeLeft--;
+            const minutes = Math.floor(gameTimeLeft / 60);
+            const seconds = gameTimeLeft % 60;
+            timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            if (gameTimeLeft <= 0) endGame();
+        }
+
+        function increaseSpeed() { starSpeed *= 2; }
+
+        function startGame() {
+            showGameView();
+            score = 0;
+            starSpeed = 2;
+            gameTimeLeft = GAME_DURATION_SECONDS;
+            scoreDisplay.textContent = score;
+            timerDisplay.textContent = "5:00";
+            
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            clearInterval(speedIncreaseInterval);
+
+            resetStar();
+            gameInterval = setInterval(gameLoop, 16);
+            timerInterval = setInterval(updateTimer, 1000);
+            speedIncreaseInterval = setInterval(increaseSpeed, 60000);
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            clearInterval(speedIncreaseInterval);
+            saveHighScore(currentPlayerName, score);
+            displayHighScores();
+            showGameOverView();
+        }
+
+        // --- Event Listeners ---
+        playerNameInput.addEventListener('input', () => {
+            currentPlayerName = playerNameInput.value.trim();
+            if (currentPlayerName) {
+                displayHighScores();
+            } else {
+                highScoreList.innerHTML = `<li>Enter a name to see scores!</li>`;
+            }
+        });
+
+        startButton.addEventListener('click', () => {
+            currentPlayerName = playerNameInput.value.trim();
+            if (currentPlayerName) {
+                startGame();
+            } else {
+                alert("Please enter a name!");
+            }
+        });
+
+        playAgainButton.addEventListener('click', startGame);
+        changePlayerButton.addEventListener('click', showStartView);
+
+        // --- Initialize UI ---
+        showStartView();
+    </script>
+</body>
+</html>
