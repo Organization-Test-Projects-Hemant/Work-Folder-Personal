@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saudi Water Authority - Internal Portal</title>
+    
+    <!-- Google Fonts: Roboto for English Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-dark: #0d47a1;
+            --primary-blue: #1976d2;
+            --accent-blue: #42a5f5;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-dark: #333333;
+            --text-grey: #666666;
+            --border-color: #e0e0e0;
+            --radius: 12px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* --- Header Section --- */
+        header {
+            background: linear-gradient(to right, var(--primary-blue), #2196f3);
+            color: white;
+            padding-bottom: 10px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 13px;
+        }
+
+        .user-info span {
+            margin-right: 20px; /* Changed from left to right for LTR */
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tools button {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        .nav-bar ul {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-bar a {
+            color: rgba(255,255,255,0.9);
+            font-weight: 500;
+            padding-bottom: 5px;
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+
+        .nav-bar a:hover, .nav-bar a.active {
+            color: white;
+            border-bottom: 2px solid white;
+        }
+
+        /* --- Layout Container --- */
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr; /* Sidebar (Left) | Content (Right) */
+            gap: 20px;
+        }
+
+        /* --- Sidebar Styling --- */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid #f0f0f0;
+        }
+
+        /* Profile Widget */
+        .profile-widget {
+            text-align: center;
+            padding-top: 20px;
+        }
+        .org-logo { width: 40px; margin-bottom: 10px; }
+        .org-name { color: var(--primary-dark); font-weight: 700; margin-bottom: 5px; }
+        .org-name-ar { display: block; font-size: 12px; color: var(--primary-blue); margin-bottom: 15px; font-family: 'Cairo', sans-serif; } /* Kept Arabic name for context */
+        
+        .avatar-section {
+            position: relative;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: var(--radius);
+        }
+        .user-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .user-name { font-weight: 700; margin-top: 5px; font-size: 16px; }
+        .user-role { font-size: 12px; color: var(--text-grey); margin-bottom: 10px; }
+        .btn-manage {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Attendance Widget */
+        .attendance-widget {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+        }
+        .time-box span { font-size: 12px; color: var(--text-grey); display: block; }
+        .time-box strong { font-size: 16px; color: var(--primary-blue); }
+
+        /* Employee Info Widget */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 13px;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--text-grey); }
+        .info-value { font-weight: 600; color: var(--primary-blue); }
+
+        /* Important Links */
+        .sidebar-header {
+            background: var(--primary-dark);
+            color: white;
+            padding: 10px;
+            border-radius: 8px 8px 0 0;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: -15px -15px 15px -15px;
+        }
+        .link-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .link-list li a { font-weight: 600; font-size: 13px; }
+        .link-list li i { color: #ccc; }
+
+        /* Calendar Widget */
+        .calendar-table { width: 100%; text-align: center; border-collapse: collapse; margin-top: 10px; }
+        .calendar-table th { font-size: 11px; color: var(--text-grey); padding-bottom: 5px; }
+        .calendar-table td { font-size: 12px; padding: 5px; cursor: pointer; border-radius: 4px; }
+        .calendar-table td.active { background-color: var(--primary-blue); color: white; }
+        .calendar-table td:hover:not(.empty) { background-color: #e3f2fd; }
+
+        /* --- Main Content Styling --- */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Hero Banner */
+        .hero {
+            background: url('https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=2070&auto=format&fit=crop') center/cover;
+            height: 250px;
+            border-radius: var(--radius);
+            position: relative;
+            overflow: hidden;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            /* Gradient flipped for LTR */
+            background: linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.5) 60%, transparent 100%);
+        }
+        .hero-text {
+            position: relative;
+            z-index: 2;
+            width: 55%;
+            padding: 40px;
+            color: var(--primary-dark);
+        }
+        .hero-text h1 { font-size: 32px; margin-bottom: 10px; color: #1976d2; font-weight: 700; }
+        .hero-text p { font-size: 15px; line-height: 1.6; color: #444; }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+        .service-card {
+            background: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+        .service-card:hover { transform: translateY(-3px); }
+        .service-info { display: flex; flex-direction: column; gap: 5px; }
+        .service-info i { font-size: 20px; color: var(--primary-blue); margin-bottom: 5px; }
+        .service-info span { font-weight: 700; font-size: 13px; }
+        .btn-arrow {
+            width: 30px; height: 30px;
+            background: #f5f5f5;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-grey);
+        }
+
+        /* News Section */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .news-card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .news-card img { width: 100%; height: 140px; object-fit: cover; }
+        .news-content { padding: 15px; }
+        .news-content h4 { font-size: 13px; margin-bottom: 8px; line-height: 1.4; color: #000; font-weight: 700; }
+        .news-content p { font-size: 11px; color: #666; line-height: 1.5; margin-bottom: 10px; }
+        .read-more { display: block; text-align: right; color: var(--primary-blue); font-size: 12px; }
+
+        /* Bottom Widgets Grid */
+        .bottom-widgets {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .widget-col {
+            background: white;
+            border-radius: var(--radius);
+            padding: 15px;
+            box-shadow: var(--shadow);
+        }
+        .widget-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Meetings List */
+        .meeting-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .meeting-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .meeting-header h5 { font-size: 13px; color: var(--primary-dark); font-weight: 600; }
+        .badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; font-weight: 600; }
+        .badge.upcoming { background: #e3f2fd; color: #1976d2; }
+        .badge.completed { background: #e8f5e9; color: #388e3c; }
+        .meeting-desc { font-size: 11px; color: #777; }
+        .btn-join { 
+            background: var(--primary-blue); color: white; border:none; padding: 4px 12px; 
+            border-radius: 4px; font-size: 11px; margin-top: 5px; cursor: pointer;
+        }
+
+        /* Circulars List */
+        .circular-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f9f9f9;
+        }
+        .icon-box {
+            width: 35px; height: 35px;
+            background: #e3f2fd;
+            color: var(--primary-blue);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .circ-info { flex: 1; }
+        .circ-title { display: block; font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+        .circ-date { font-size: 10px; color: #999; }
+
+        /* Video Widget */
+        .video-wrapper {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 200px;
+        }
+        .video-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .play-btn {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px; height: 50px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary-blue);
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .play-btn:hover { background: white; transform: translate(-50%, -50%) scale(1.1); }
+
+        /* Footer */
+        footer {
+            background: #0d47a1;
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+        }
+        .footer-logo img { height: 30px; filter: brightness(0) invert(1); }
+        .copyright { font-size: 12px; opacity: 0.8; }
+        .footer-text { font-weight: 500; font-size: 13px; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container { grid-template-columns: 1fr; }
+            .sidebar { order: 2; } 
+            .services-grid { grid-template-columns: repeat(2, 1fr); }
+            .bottom-widgets { grid-template-columns: 1fr; }
+            .news-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="top-bar">
+            <div class="user-info">
+                <span><i class="fa-regular fa-user-circle"></i> Ghanem</span>
+                <span><i class="fa-regular fa-calendar"></i> 3-Sept-2024</span>
+                <span><i class="fa-regular fa-clock"></i> 2:30 PM</span>
+                <span><i class="fa-solid fa-location-dot"></i> Riyadh</span>
+            </div>
+           <!-- Inside dashboard-en.html -->
+<div class="tools">
+    <!-- This button now redirects to the Arabic file -->
+    <button onclick="window.location.href='dashboard-ar.html'">عربي <i class="fa-solid fa-globe"></i></button> 
+    
+    <button style="margin-right: 10px;">Search <i class="fa-solid fa-magnifying-glass"></i></button>
+</div>
+        </div>
+        <nav class="nav-bar">
+            <ul>
+                <li><a href="#" class="active">Home</a></li>
+                <li><a href="#">News</a></li>
+                <li><a href="#">Events</a></li>
+                <li><a href="#">Circulars</a></li>
+                <li><a href="#">Policies</a></li>
+                <li><a href="#">E-Services</a></li>
+                <li><a href="#">Systems</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        
+        <!-- LEFT SIDEBAR -->
+        <aside class="sidebar">
+            
+            <!-- User Profile -->
+            <div class="card profile-widget">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Logo" class="org-logo"> 
+                <div class="org-name">Saudi Water Authority</div>
+                <!-- Kept Arabic for authenticity/logo feel -->
+                <span class="org-name-ar">الهيئة السعودية للمياه</span>
+                
+                <div class="avatar-section">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="user-avatar">
+                    <h3 class="user-name">Abdullah Bin Khalid</h3>
+                    <p class="user-role">App Development Manager</p>
+                    <button class="btn-manage">Administration</button>
+                </div>
+            </div>
+
+            <!-- Attendance -->
+            <div class="card attendance-widget">
+                <div class="time-box">
+                    <span>Check In:</span>
+                    <strong>8:30 AM</strong>
+                </div>
+                <div class="time-box">
+                    <span>Check Out:</span>
+                    <strong>4:00 PM</strong>
+                </div>
+            </div>
+
+            <!-- Employee Details -->
+            <div class="card">
+                <div class="info-row">
+                    <span class="info-label">Location</span>
+                    <span class="info-value">Riyadh</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Grade</span>
+                    <span class="info-value">10</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Rank</span>
+                    <span class="info-value">05</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Direct Manager</span>
+                    <span class="info-value">Ahmed Khalid</span>
+                </div>
+            </div>
+
+            <!-- Important Links -->
+            <div class="card" style="padding: 0;">
+                <div class="sidebar-header">
+                    <i class="fa-solid fa-link"></i> Important Links
+                </div>
+                <ul class="link-list" style="padding: 0 15px 15px;">
+                    <li><a href="#">Correspondence</a> <i class="fa-solid fa-arrow-up-right-from-square"></i></li>
+                    <li><a href="#">Visitor Permits</a> <i class="fa-solid fa-arrow-up-right-from-square"></i></li>
+                    <li><a href="#">SAP System</a> <i class="fa-solid fa-arrow-up-right-from-square"></i></li>
+                    <li><a href="#">My Services</a> <i class="fa-solid fa-arrow-up-right-from-square"></i></li>
+                </ul>
+            </div>
+
+            <!-- Calendar -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <strong>Calendar</strong>
+                    <span style="font-size: 12px; color:#666;">January 2024</span>
+                </div>
+                <table class="calendar-table">
+                    <thead>
+                        <tr>
+                            <th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+                        <tr><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td class="active">12</td><td>13</td></tr>
+                        <tr><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td></tr>
+                        <tr><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td></tr>
+                        <tr><td>28</td><td>29</td><td>30</td><td>31</td><td></td><td></td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </aside>
+
+        <!-- MAIN CONTENT (RIGHT) -->
+        <main class="main-content">
+            
+            <!-- Hero Banner -->
+            <div class="hero">
+                <div class="hero-text">
+                    <h1>A Journey into Global Water</h1>
+                    <p>Explore with us the Global Water Platform, which includes more than 100 water data indicators, comparing Saudi Arabia's data with four selected countries globally.</p>
+                </div>
+            </div>
+
+            <!-- Services Quick Links -->
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-info">
+                        <i class="fa-solid fa-award"></i>
+                        <span>Excellence Award</span>
+                    </div>
+                    <div class="btn-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                </div>
+                <div class="service-card">
+                    <div class="service-info">
+                        <i class="fa-solid fa-droplet"></i>
+                        <span>Global Water Platform</span>
+                    </div>
+                    <div class="btn-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                </div>
+                <div class="service-card">
+                    <div class="service-info">
+                        <i class="fa-solid fa-flask"></i>
+                        <span>Laboratories</span>
+                    </div>
+                    <div class="btn-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                </div>
+                <div class="service-card">
+                    <div class="service-info">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>More Services</span>
+                    </div>
+                    <div class="btn-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                </div>
+            </div>
+
+            <!-- News Section -->
+            <div>
+                <div class="section-header">
+                    <i class="fa-regular fa-newspaper"></i> News & Articles Section
+                </div>
+                <div class="news-grid">
+                    <!-- Article 1 -->
+                    <div class="news-card">
+                        <img src="https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?auto=format&fit=crop&q=80&w=400" alt="News">
+                        <div class="news-content">
+                            <h4>Regular Meeting Between SWA and Private Sector...</h4>
+                            <p>The Authority held its first regular meeting with the Saudi Water Partnership Company...</p>
+                            <a href="#" class="read-more"><i class="fa-solid fa-arrow-right"></i> Read More</a>
+                        </div>
+                    </div>
+                    <!-- Article 2 -->
+                    <div class="news-card">
+                        <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&q=80&w=400" alt="News">
+                        <div class="news-content">
+                            <h4>His Excellency Visits Rabigh Water Oasis...</h4>
+                            <p>The Minister of Environment, Water and Agriculture, Eng. Abdulrahman Al-Fadley visited...</p>
+                            <a href="#" class="read-more"><i class="fa-solid fa-arrow-right"></i> Read More</a>
+                        </div>
+                    </div>
+                    <!-- Article 3 -->
+                    <div class="news-card">
+                        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=400" alt="News">
+                        <div class="news-content">
+                            <h4>Water Desalination Holds First Council Meeting...</h4>
+                            <p>"Water Desalination", the operational arm of the SWA, held the first Safety Council meeting...</p>
+                            <a href="#" class="read-more"><i class="fa-solid fa-arrow-right"></i> Read More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Widgets Grid -->
+            <div class="bottom-widgets">
+                
+                <!-- Meetings -->
+                <div class="widget-col">
+                    <div class="widget-title"><i class="fa-regular fa-calendar-check"></i> Meetings</div>
+                    
+                    <div class="meeting-item">
+                        <div class="meeting-header">
+                            <h5>Monthly Board Meeting</h5>
+                            <span class="badge upcoming">Upcoming</span>
+                        </div>
+                        <p class="meeting-desc">Monthly review of operations and planning</p>
+                        <button class="btn-join" onclick="joinMeeting()">Join</button>
+                    </div>
+
+                    <div class="meeting-item" style="opacity: 0.7;">
+                        <div class="meeting-header">
+                            <h5>Data Governance Meeting</h5>
+                            <span class="badge completed">Completed</span>
+                        </div>
+                        <p class="meeting-desc">Review of new data policies</p>
+                    </div>
+                </div>
+
+                <!-- Circulars -->
+                <div class="widget-col">
+                    <div class="widget-title"><i class="fa-regular fa-file-pdf"></i> Latest Circulars</div>
+                    
+                    <div class="circular-item">
+                        <div class="icon-box"><i class="fa-regular fa-file-lines"></i></div>
+                        <div class="circ-info">
+                            <a class="circ-title" href="#">Business Continuity Policy Circular...</a>
+                            <span class="circ-date">12 Ramadan 1445 H</span>
+                        </div>
+                        <i class="fa-solid fa-share-nodes" style="color:#ccc; font-size:12px;"></i>
+                    </div>
+
+                    <div class="circular-item">
+                        <div class="icon-box"><i class="fa-regular fa-file-lines"></i></div>
+                        <div class="circ-info">
+                            <a class="circ-title" href="#">Data Protection Policy Circular...</a>
+                            <span class="circ-date">12 Ramadan 1445 H</span>
+                        </div>
+                        <i class="fa-solid fa-share-nodes" style="color:#ccc; font-size:12px;"></i>
+                    </div>
+
+                    <div class="circular-item">
+                        <div class="icon-box"><i class="fa-regular fa-file-lines"></i></div>
+                        <div class="circ-info">
+                            <a class="circ-title" href="#">New Labor Law Decree...</a>
+                            <span class="circ-date">12 Ramadan 1445 H</span>
+                        </div>
+                        <i class="fa-solid fa-share-nodes" style="color:#ccc; font-size:12px;"></i>
+                    </div>
+                </div>
+
+                <!-- Videos -->
+                <div class="widget-col">
+                    <div class="widget-title"><i class="fa-solid fa-video"></i> Authority Videos</div>
+                    <div class="video-wrapper">
+                        <img src="https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=400" alt="Video Thumb">
+                        <div class="play-btn" onclick="playVideo()"><i class="fa-solid fa-play"></i></div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Saudi_Vision_2030_logo.svg/1200px-Saudi_Vision_2030_logo.svg.png" alt="Vision 2030">
+        </div>
+        <div class="copyright">
+            All rights reserved to Saudi Water Authority © 2025
+        </div>
+        <div class="footer-text">
+           Saudi Water Authority
+        </div>
+    </footer>
+
+    <!-- JavaScript Interactions -->
+    <script>
+        function joinMeeting() {
+            alert('Joining the meeting...');
+        }
+
+        function playVideo() {
+            alert('Playing video...');
+        }
+
+        // Highlight Calendar Day Logic
+        document.querySelectorAll('.calendar-table td').forEach(td => {
+            td.addEventListener('click', function() {
+                if(this.innerText.trim() !== "") {
+                    document.querySelectorAll('.calendar-table td').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
