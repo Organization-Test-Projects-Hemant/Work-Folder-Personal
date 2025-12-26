@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Upload Test</title>
+	</head>
+	<body>
+		<h1>Upload Test Page</h1>
+		<input type="file" id="fileInput" accept=".docx" />
+		<button id="convertButton">Test Upload</button>
+		<div id="statusMessage"></div>
+
+		<script>
+			document
+				.getElementById("convertButton")
+				.addEventListener("click", async function () {
+					const fileInput = document.getElementById("fileInput");
+					const statusMessage = document.getElementById("statusMessage");
+
+					if (fileInput.files.length === 0) {
+						statusMessage.textContent = "Please select a file.";
+						return;
+					}
+
+					const selectedFile = fileInput.files[0];
+					const formData = new FormData();
+					formData.append("file", selectedFile);
+
+					statusMessage.textContent = "Uploading...";
+
+					try {
+						console.log(
+							"Starting upload request to http://127.0.0.1:5000/upload"
+						);
+						const response = await fetch("http://127.0.0.1:5000/upload", {
+							method: "POST",
+							body: formData,
+						});
+
+						console.log("Upload response status:", response.status);
+						console.log("Upload response ok:", response.ok);
+
+						if (!response.ok) {
+							const errorText = await response.text();
+							console.error("Server error response:", errorText);
+							throw new Error(
+								`Server error (${response.status}): ${errorText}`
+							);
+						}
+
+						const responseText = await response.text();
+						console.log("Raw response text:", responseText);
+
+						let data;
+						try {
+							data = JSON.parse(responseText);
+							console.log("Parsed JSON data:", data);
+						} catch (jsonError) {
+							console.error("JSON parsing failed:", jsonError);
+							throw new Error(`Invalid response format: ${jsonError.message}`);
+						}
+
+						if (data.message && data.filename) {
+							statusMessage.textContent = `Success: ${data.filename}`;
+							statusMessage.style.color = "green";
+						} else {
+							statusMessage.textContent =
+								"Upload failed: " + (data.error || "Unknown error");
+							statusMessage.style.color = "red";
+						}
+					} catch (error) {
+						console.error("Upload error details:", error);
+						statusMessage.textContent = "Upload failed: " + error.message;
+						statusMessage.style.color = "red";
+					}
+				});
+		</script>
+	</body>
+</html>
